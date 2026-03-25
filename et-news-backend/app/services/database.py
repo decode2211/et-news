@@ -52,3 +52,43 @@ def search_articles_by_persona(user_interests: list[str], limit: int = 5):
         ))
         
     return formatted_results
+
+def add_articles_to_db(articles: list[RawArticle]):
+    """Embeds and saves articles into ChromaDB."""
+    vector_store = get_vector_store()
+    
+    texts = [article.content for article in articles]
+    # UPDATE: Add published_date and source_feed to metadata
+    metadatas = [{
+        "id": a.id, 
+        "title": a.title, 
+        "url": a.url or "",
+        "published_date": a.published_date or "Recent",
+        "source_feed": a.source_feed or "Economic Times"
+    } for a in articles]
+    
+    ids = [article.id for article in articles]
+    
+    vector_store.add_texts(texts=texts, metadatas=metadatas, ids=ids)
+    print(f"Successfully added {len(articles)} articles to the vector database.")
+    return len(articles)
+
+def search_articles_by_persona(user_interests: list[str], limit: int = 5):
+    """Searches the database for articles matching the user's interests."""
+    vector_store = get_vector_store()
+    query = " ".join(user_interests)
+    results = vector_store.similarity_search(query, k=limit)
+    
+    formatted_results = []
+    for doc in results:
+        # UPDATE: Extract the new fields when searching
+        formatted_results.append(RawArticle(
+            id=doc.metadata.get("id", "unknown"),
+            title=doc.metadata.get("title", "No Title"),
+            content=doc.page_content,
+            url=doc.metadata.get("url", ""),
+            published_date=doc.metadata.get("published_date", "Recent"),
+            source_feed=doc.metadata.get("source_feed", "Economic Times")
+        ))
+        
+    return formatted_results

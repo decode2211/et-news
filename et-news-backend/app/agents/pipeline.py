@@ -34,5 +34,8 @@ async def run_news_pipeline(request: NewsRequest) -> dict:
         "articles_processed": len(request.articles),
         "dominant_sentiment": analyzed_articles[0]['metadata'].get('sentiment', 'Neutral') if analyzed_articles else 'Neutral'
     }
+    # NEW: Attach the raw articles so the frontend can display clickable cards
+    final_output['source_articles'] = request.articles
+
     
     return final_output

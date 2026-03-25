@@ -6,6 +6,8 @@ class RawArticle(BaseModel):
     title: str
     content: str
     url: Optional[str] = None
+    published_date: Optional[str] = "Recent" # NEW
+    source_feed: Optional[str] = "Economic Times" # NEW
 
 class UserProfile(BaseModel):
     persona: str
@@ -20,3 +22,4 @@ class ProcessedNewsResponse(BaseModel):
     personalized_briefing: str
     why_it_matters: List[str]
     metadata: Dict[str, Any]
+    source_articles: List[RawArticle] # NEW: We send the raw data to the frontend!
